@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slipstream", "src\Slipstream\Slipstream.csproj", "{A0059492-76EC-9722-6CF7-7E095FCD46F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slipstream.Tests", "tests\Slipstream.Tests\Slipstream.Tests.csproj", "{662CAD77-DAFD-A31E-FF52-FEF0C5493003}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A0059492-76EC-9722-6CF7-7E095FCD46F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0059492-76EC-9722-6CF7-7E095FCD46F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0059492-76EC-9722-6CF7-7E095FCD46F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0059492-76EC-9722-6CF7-7E095FCD46F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{662CAD77-DAFD-A31E-FF52-FEF0C5493003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{662CAD77-DAFD-A31E-FF52-FEF0C5493003}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{662CAD77-DAFD-A31E-FF52-FEF0C5493003}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{662CAD77-DAFD-A31E-FF52-FEF0C5493003}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8993CC9C-4BE2-4327-A0A3-267A218CE116}
+	EndGlobalSection
+EndGlobal
