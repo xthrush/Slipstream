@@ -90,12 +90,10 @@ namespace Slipstream.Registration
             if (register is null) throw new ArgumentNullException(nameof(register));
             if (registerCollection is null) throw new ArgumentNullException(nameof(registerCollection));
 
-            using var registrar = new DisposableDelegateRegistrar(register, registerCollection);
-            registrar.Inner.RegisterHandlersAndBehaviors(assemblies);
+            var registrar = new DelegateRegistrar(register, registerCollection);
+            // call the other extension to perform scanning and registration
+            registrar.RegisterHandlersAndBehaviors((IEnumerable<Assembly>)assemblies);
         }
-
-        private static IRegistrar DisposableDelegateRegistrar(Action<Type, Type> register, Action<Type, Type> registerCollection)
-            => new DelegateRegistrar(register, registerCollection);
 
         private static IEnumerable<Type> SafeGetTypes(Assembly assembly)
         {
