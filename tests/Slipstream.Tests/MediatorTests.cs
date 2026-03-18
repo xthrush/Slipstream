@@ -48,12 +48,20 @@ public class MediatorTests
         {
             if (serviceType.IsGenericType && serviceType.GetGenericTypeDefinition() == typeof(IRequestHandler<,>))
             {
-                return _handler;
+                var requestType = serviceType.GetGenericArguments()[0];
+                if (_handler.GetType().GetInterfaces().Any(i =>
+                    i.IsGenericType && i.GetGenericArguments().Contains(requestType)))
+                    return _handler;
+                return null;
             }
 
             if (serviceType.IsGenericType && serviceType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
             {
-                return _behaviors;
+                var elementType = serviceType.GetGenericArguments()[0];
+                var typedArray = Array.CreateInstance(elementType, _behaviors.Length);
+                for (int i = 0; i < _behaviors.Length; i++)
+                    typedArray.SetValue(_behaviors[i], i);
+                return typedArray;
             }
 
             if (serviceType == typeof(IDispatcher))
@@ -62,6 +70,25 @@ public class MediatorTests
             }
 
             return null;
+        }
+    }
+
+    private record UnregisteredRequest : IRequest<string>;
+
+    private class ShortCircuitBehavior : IPipelineBehavior<TestRequest, int>
+    {
+        public Task<int> Handle(TestRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<int> next)
+            => Task.FromResult(-1); // never calls next
+    }
+
+    private class TokenCapturingHandler : IRequestHandler<TestRequest, int>
+    {
+        public CancellationToken CapturedToken { get; private set; }
+
+        public Task<int> Handle(TestRequest request, CancellationToken cancellationToken)
+        {
+            CapturedToken = cancellationToken;
+            return Task.FromResult(request.Value);
         }
     }
 
@@ -82,5 +109,77 @@ public class MediatorTests
 
         Assert.Equal(6, result);
         Assert.Equal(4, log.Count); // ensure behaviors executed
+    }
+
+    [Fact]
+    public async Task Send_Returns_Correct_Result_Without_Behaviors()
+    {
+        var handler = new TestHandler();
+        var provider = new SimpleProvider(handler);
+        var dispatcher = new SlipstreamDispatcher(provider);
+
+        var result = await dispatcher.Send<int>(new TestRequest(5));
+
+        Assert.Equal(10, result);
+    }
+
+    [Fact]
+    public async Task Send_Throws_When_Request_Is_Null()
+    {
+        var provider = new SimpleProvider(new TestHandler());
+        var dispatcher = new SlipstreamDispatcher(provider);
+
+        await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            dispatcher.Send<int>(null!));
+    }
+
+    [Fact]
+    public async Task Send_Throws_When_No_Handler_Registered()
+    {
+        var provider = new SimpleProvider(new TestHandler());
+        var dispatcher = new SlipstreamDispatcher(provider);
+
+        // Use a different request type that has no handler
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            dispatcher.Send<string>(new UnregisteredRequest()));
+    }
+
+    [Fact]
+    public async Task Behavior_Can_Short_Circuit()
+    {
+        var handler = new TestHandler();
+        var provider = new SimpleProvider(handler, new ShortCircuitBehavior());
+        var dispatcher = new SlipstreamDispatcher(provider);
+
+        var result = await dispatcher.Send<int>(new TestRequest(5));
+
+        Assert.Equal(-1, result); // handler never called
+    }
+
+    [Fact]
+    public async Task Pipeline_Order_Log_Is_Correct()
+    {
+        var log = new List<string>();
+        var provider = new SimpleProvider(new TestHandler(),
+            new OrderBehavior(log, "one"),
+            new OrderBehavior(log, "two"));
+        var dispatcher = new SlipstreamDispatcher(provider);
+
+        await dispatcher.Send<int>(new TestRequest(3));
+
+        Assert.Equal(new[] { "one-before", "two-before", "two-after", "one-after" }, log);
+    }
+
+    [Fact]
+    public async Task CancellationToken_Is_Passed_To_Handler()
+    {
+        var cts = new CancellationTokenSource();
+        var handler = new TokenCapturingHandler();
+        var provider = new SimpleProvider(handler);
+        var dispatcher = new SlipstreamDispatcher(provider);
+
+        await dispatcher.Send<int>(new TestRequest(1), cts.Token);
+
+        Assert.Equal(cts.Token, handler.CapturedToken);
     }
 }

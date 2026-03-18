@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Slipstream.Abstractions;
+using System.Reflection;
 
 namespace Slipstream.Registration
 {
@@ -67,6 +64,10 @@ namespace Slipstream.Registration
                     var def = iface.GetGenericTypeDefinition();
 
                     if (def == typeof(IRequestHandler<,>))
+                    {
+                        registrar.Register(iface, impl);
+                    }
+                    else if (def == typeof(IRequestHandler<>))
                     {
                         registrar.Register(iface, impl);
                     }
