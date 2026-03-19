@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
 	<PackageId>Slipstream</PackageId>
 	<Version>0.0.1</Version>
 	<Authors>Tim Taylor</Authors>
@@ -11,7 +12,7 @@
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-  <PropertyGroup>
+  
 	  
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
