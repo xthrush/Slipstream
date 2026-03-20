@@ -1,19 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
 	<PackageId>Slipstream</PackageId>
-	<Version>0.0.1</Version>
+	<Version>0.0.2</Version>
 	<Authors>Tim Taylor</Authors>
 	<Description>A lightweight, fast MediatR alternative focused on request/response dispatching with pipeline behavior support.</Description>
-	<PackageTags>mediatr;dispatcher;pipeline;cqrs;mediator</PackageTags>
-	<PackageProjectUrl>https://github.com/yourusername/yourrepo</PackageProjectUrl>
-	<RepositoryUrl>https://github.com/yourusername/yourrepo</RepositoryUrl>
+	<PackageTags>dispatcher;pipeline;cqrs;mediator</PackageTags>
+	<PackageProjectUrl>https://github.com/xthrush/Slipstream</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/xthrush/Slipstream</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-  
-	  
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -27,4 +24,7 @@
     <Folder Include="Behaviors\" />
   </ItemGroup>
 
+  <ItemGroup>
+	<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 </Project>

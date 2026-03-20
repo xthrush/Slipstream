@@ -1,5 +1,3 @@
-
-
 # Slipstream
 
 **Fast, lean CQRS dispatcher with pipeline behaviors.**
@@ -63,15 +61,15 @@ public class DeleteOrderHandler : IRequestHandler<DeleteOrder>
 ### 3. Register with your DI container
 
 ```csharp
-// Register the dispatcher
-services.AddTransient<IDispatcher, SlipstreamDispatcher>();
+// Scans the assembly and registers all handlers and the dispatcher
+builder.Services.AddSlipstream(typeof(GetOrderByIdHandler).Assembly);
 
-// Register handlers manually...
-services.AddTransient<IRequestHandler<GetOrderById, Order>, GetOrderByIdHandler>();
-
-// ...or use assembly scanning
-services.RegisterHandlersAndBehaviors(typeof(GetOrderByIdHandler).Assembly);
+// Register behaviors manually in the order you want them to execute
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 ```
+
+> **Note:** Behaviors are intentionally left to the consumer to register. Order matters — behaviors execute in registration order, so explicit control is by design.
 
 ### 4. Dispatch
 
@@ -122,32 +120,10 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
 }
 ```
 
-Register behaviors with your DI container:
-
-```csharp
-services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
-```
-
 Behaviors execute in registration order, wrapping the handler like an onion:
 
 ```
 Behavior1 -> Behavior2 -> Handler -> Behavior2 -> Behavior1
-```
-
----
-
-## Assembly Scanning
-
-Slipstream includes a registration helper to scan assemblies and register all handlers and behaviors automatically:
-
-```csharp
-// Using the IRegistrar abstraction (container-agnostic)
-var registrar = new DelegateRegistrar(
-    (service, impl) => services.AddTransient(service, impl),
-    (service, impl) => services.AddTransient(service, impl)
-);
-
-registrar.RegisterHandlersAndBehaviors(typeof(MyHandler).Assembly);
 ```
 
 ---

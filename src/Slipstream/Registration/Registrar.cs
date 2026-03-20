@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Slipstream.Abstractions;
 using System.Reflection;
 
@@ -34,6 +35,19 @@ namespace Slipstream.Registration
 
     public static class RegistrarExtensions
     {
+        public static IServiceCollection AddSlipstream(
+            this IServiceCollection services,
+            params Assembly[] assemblies)
+        {
+            var registrar = new DelegateRegistrar(
+                (service, impl) => services.AddTransient(service, impl),
+                (service, impl) => services.AddTransient(service, impl)
+            );
+            registrar.RegisterHandlersAndBehaviors(assemblies);
+            services.AddTransient<IDispatcher, SlipstreamDispatcher>();
+            return services;
+        }
+
         /// <summary>
         /// Scan the supplied assemblies and register all implementations of <see cref="IRequestHandler{TRequest, TResponse}"/>
         /// and <see cref="IPipelineBehavior{TRequest, TResponse}"/> using the provided registrar.
