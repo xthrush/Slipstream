@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
 	<PackageId>Slipstream</PackageId>
-	<Version>0.0.2</Version>
+	<Version>0.0.4</Version>
 	<Authors>Tim Taylor</Authors>
 	<Description>A lightweight, fast MediatR alternative focused on request/response dispatching with pipeline behavior support.</Description>
 	<PackageTags>dispatcher;pipeline;cqrs;mediator</PackageTags>

@@ -8,7 +8,7 @@ namespace Slipstream.Registration
     /// Minimal container-agnostic registrar abstraction. Implement this against your container
     /// (or use the delegate-based overloads) to register request handlers and pipeline behaviors.
     /// </summary>
-    public interface IRegistrar
+    internal interface IRegistrar
     {
         /// <summary>Register a single service -> implementation mapping.</summary>
         void Register(Type service, Type implementation);
@@ -35,6 +35,17 @@ namespace Slipstream.Registration
 
     public static class RegistrarExtensions
     {
+        /// <summary>
+        /// Adds Slipstream request dispatcher services and registers request handlers from the specified assemblies to the
+        /// dependency injection container.
+        /// </summary>
+        /// <remarks>This method registers the Slipstream request dispatcher and all discovered request
+        /// handlers as transient services. Call this method during application startup to enable Slipstream-based event
+        /// handling.</remarks>
+        /// <param name="services">The service collection to which Slipstream services and request handlers will be added.</param>
+        /// <param name="assemblies">An array of assemblies to scan for request handler registrations. Each assembly is searched for types to
+        /// register as request handlers.</param>
+        /// <returns>The same service collection instance, enabling method chaining.</returns>
         public static IServiceCollection AddSlipstream(
             this IServiceCollection services,
             params Assembly[] assemblies)
@@ -43,22 +54,17 @@ namespace Slipstream.Registration
                 (service, impl) => services.AddTransient(service, impl),
                 (service, impl) => services.AddTransient(service, impl)
             );
-            registrar.RegisterHandlersAndBehaviors(assemblies);
+            registrar.RegisterHandlers((IEnumerable<Assembly>)assemblies);
             services.AddTransient<IDispatcher, SlipstreamDispatcher>();
             return services;
         }
 
         /// <summary>
         /// Scan the supplied assemblies and register all implementations of <see cref="IRequestHandler{TRequest, TResponse}"/>
-        /// and <see cref="IPipelineBehavior{TRequest, TResponse}"/> using the provided registrar.
-        /// Handlers are registered as single services; behaviors are registered as collection entries.
+        /// using the provided registrar.
+        /// Handlers are registered as single services.
         /// </summary>
-        public static void RegisterHandlersAndBehaviors(this IRegistrar registrar, params Assembly[] assemblies)
-        {
-            RegisterHandlersAndBehaviors(registrar, (IEnumerable<Assembly>)assemblies);
-        }
-
-        public static void RegisterHandlersAndBehaviors(this IRegistrar registrar, IEnumerable<Assembly> assemblies)
+        private static void RegisterHandlers(this IRegistrar registrar, IEnumerable<Assembly> assemblies)
         {
             if (registrar is null) throw new ArgumentNullException(nameof(registrar));
             if (assemblies is null) throw new ArgumentNullException(nameof(assemblies));
@@ -77,37 +83,12 @@ namespace Slipstream.Registration
                 {
                     var def = iface.GetGenericTypeDefinition();
 
-                    if (def == typeof(IRequestHandler<,>))
+                    if (def == typeof(IRequestHandler<,>) || def == typeof(IRequestHandler<>))
                     {
                         registrar.Register(iface, impl);
-                    }
-                    else if (def == typeof(IRequestHandler<>))
-                    {
-                        registrar.Register(iface, impl);
-                    }
-                    else if (def == typeof(IPipelineBehavior<,>))
-                    {
-                        registrar.RegisterCollection(iface, impl);
-                    }
+                    }                    
                 }
             }
-        }
-
-        /// <summary>
-        /// Helper that accepts simple delegates for registration so you can use any container API.
-        /// Example: for MS DI pass in (service, impl) => services.AddTransient(service, impl)
-        /// and for collections call services.AddTransient(service, impl) for each behavior.
-        /// </summary>
-        public static void RegisterHandlersAndBehaviors(this Action<Type, Type> register,
-            Action<Type, Type> registerCollection,
-            params Assembly[] assemblies)
-        {
-            if (register is null) throw new ArgumentNullException(nameof(register));
-            if (registerCollection is null) throw new ArgumentNullException(nameof(registerCollection));
-
-            var registrar = new DelegateRegistrar(register, registerCollection);
-            // call the other extension to perform scanning and registration
-            registrar.RegisterHandlersAndBehaviors((IEnumerable<Assembly>)assemblies);
         }
 
         private static IEnumerable<Type> SafeGetTypes(Assembly assembly)
