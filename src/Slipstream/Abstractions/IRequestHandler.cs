@@ -1,4 +1,7 @@
-﻿namespace Slipstream.Abstractions;
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace Slipstream.Abstractions;
 
 /// <summary>Handles a request that returns a response.</summary>
 public interface IRequestHandler<in TRequest, TResponse>

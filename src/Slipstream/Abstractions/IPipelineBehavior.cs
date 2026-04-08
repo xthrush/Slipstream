@@ -1,4 +1,7 @@
-﻿namespace Slipstream.Abstractions;
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace Slipstream.Abstractions;
 
 /// <summary>Pipeline behavior invoked before/after the handler.</summary>
 public interface IPipelineBehavior<in TRequest, TResponse>

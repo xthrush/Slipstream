@@ -1,4 +1,7 @@
-﻿namespace Slipstream.Abstractions;
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace Slipstream.Abstractions;
 
 /// <summary>Dispatches requests through the configured pipeline to their handler.</summary>
 public interface IDispatcher
